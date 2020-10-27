@@ -1,5 +1,3 @@
-package tictactoe;
-
 public class Cell {
     private int state;
     
