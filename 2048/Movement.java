@@ -22,11 +22,10 @@ class Movement {
     }
 
     // returns true if the tile has been moved to or over the intended place on the x axis
-    boolean isMovedOnX(Tile[][] board) {
-        Tile from = board[fromY][fromX];
-        Tile to = board[toY][toX];
+    boolean isMovedOnX(GUIClient client) {
+        Tile from = client.getBoard()[fromY][fromX];
         float fromSX = from.screenX();
-        float toSX = to.screenX();
+        float toSX = Tile.screenX(client, toX);
 
         int difX = toX - fromX; // difference of x in tile count
 
@@ -35,11 +34,10 @@ class Movement {
     }
 
     // returns true if the tile has been moved to or over the intended place on the y axis
-    boolean isMovedOnY(Tile[][] board) {
-        Tile from = board[fromY][fromX];
-        Tile to = board[toY][toX];
+    boolean isMovedOnY(GUIClient client) {
+        Tile from = client.getBoard()[fromY][fromX];
         float fromSY = from.screenY();
-        float toSY = to.screenY();
+        float toSY = Tile.screenY(client, toY);
 
         int difY = toY - fromY;
 
