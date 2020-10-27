@@ -1,8 +1,4 @@
-import java.util.Comparator;
-import java.util.Iterator;
 import java.util.Random;
-import java.util.TreeSet;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 // https://rosettacode.org/wiki/2048
@@ -108,7 +104,7 @@ public class G2048 {
                     // numbered tile
                     if (tile != 0 && nxtTile != 0) {
                         // different number
-                        if (nxtTile != tile) break;
+                        if (nxtTile != tile) {}
                         // same number
                         else {
                             board[row][column] *= 2;
@@ -116,8 +112,8 @@ public class G2048 {
                             if (board[row][column] > score) score = board[row][column];
                             movement.accept(new Movement(true, y, x, row, column));
                             hasChanged = true;
-                            break;
                         }
+                        break;
                     }
 
                     // empty tile
