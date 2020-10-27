@@ -22,8 +22,8 @@ class Tile {
     void setScreenXY(int y, int x) {
         this.y = y;
         this.x = x;
-        screenY = client.boardY() + y * GUIClient.TILE_SIDE + GUIClient.TILE_GAP * (y+1);
-        screenX = client.boardX() + x * GUIClient.TILE_SIDE + GUIClient.TILE_GAP * (x+1);
+        screenY = screenY(client, y);
+        screenX = screenX(client, x);
     }
 
     void moveScreenXY(float YIncr, float XIncr) {
@@ -68,6 +68,14 @@ class Tile {
 
     public int textSize() {
         return textSize;
+    }
+
+    static float screenX(GUIClient client, int x) {
+        return client.boardX() + x * GUIClient.TILE_SIDE + GUIClient.TILE_GAP * (x+1);
+    }
+
+    static float screenY(GUIClient client, int y) {
+        return client.boardY() + y * GUIClient.TILE_SIDE + GUIClient.TILE_GAP * (y+1);
     }
 
     static Color tileColor(int value) {
