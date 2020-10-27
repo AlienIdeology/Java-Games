@@ -54,18 +54,11 @@ public class GUIClient extends PApplet {
                 return p;
             }
         };
-
-        int[][] bd = game.getBoard();
-        for (int i = 0; i < side; i++) {
-            for (int j = 0; j < side; j++) {
-                Tile t = board[i][j];
-                if (t == null || t.value() == 0) board[i][j] = new Tile(this, bd[i][j], i, j);
-            }
-        }
     }
 
     @Override
     public void draw() {
+        // There are movements to be drawn, still
         if (!moves.isEmpty()) {
             Movement nxt = moves.peek();
             int fY = nxt.fromY;
@@ -74,44 +67,45 @@ public class GUIClient extends PApplet {
             int tX = nxt.toX;
 
             Tile from = board[fY][fX];
-            if (nxt.isMovedOnX(board) && nxt.isMovedOnY(board)) {
-                Tile to = board[tY][tX];
+            if (nxt.isMovedOnX(this) && nxt.isMovedOnY(this)) {
                 if (nxt.isMerging) {
                     from.setValue(from.value() * 2);
-                    to.setValue(0);
                 }
 
                 from.setScreenXY(tY, tX);
-                to.setScreenXY(fY, fX);
-                board[fY][fX] = to;
+                board[fY][fX] = null;
                 board[tY][tX] = from;
 
                 moves.poll();
             } else {
                 from.moveScreenXY(nxt.yIncr, nxt.xIncr);
             }
+            drawBoard();
+            drawTiles();
         } else {
+            // If there are new tiles not yet drawn
             if (!newTiles.isEmpty()) {
                 Tile nt = newTiles.poll();
                 board[nt.y()][nt.x()] = nt;
                 System.out.println(game);
+                drawBoard();
+                drawTiles();
             } else {
+                // If the game is over
                 if (game.isWon() || game.isLost()) {
                     drawEnding();
                     noLoop();
-                    return;
                 }
+                // no change (no input)
             }
         }
-        drawBoard();
-        drawTiles();
     }
 
     private void drawTiles() {
         for (int i = 0; i < side; i++) {
             for (int j = 0; j < side; j++) {
                 Tile tile = board[i][j];
-                if (tile.value() == 0) continue;
+                if (tile == null) continue;
 
                 // tile
                 rectMode(CORNER);
@@ -173,9 +167,7 @@ public class GUIClient extends PApplet {
     }
 
     // Used to pass to G2048's movement methods
-    private final Consumer<Movement> queueIt = (m) -> {
-        moves.add(m);
-    };
+    private final Consumer<Movement> queueIt = (m) -> moves.add(m);
 
     @Override
     public void keyReleased() {
@@ -200,13 +192,15 @@ public class GUIClient extends PApplet {
     @Override
     public void setup() {
         frameRate(100);
-        drawBoard();
-        drawTiles();
     }
 
     @Override
     public void settings() {
         size(WINDOW_X, WINDOW_Y);
+    }
+
+    public Tile[][] getBoard() {
+        return board;
     }
 
     public int boardX() {
