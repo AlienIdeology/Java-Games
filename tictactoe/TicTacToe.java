@@ -1,5 +1,3 @@
-package tictactoe;
-
 public class TicTacToe {
 
     private final Cell[][] board;
