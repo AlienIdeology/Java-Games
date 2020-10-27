@@ -14,7 +14,6 @@ public class G2048 {
     private final int side;
     private final int winScore;
     private final int[][] board;
-    private final TreeSet<Pair<Integer>> emptyCells; // using a treeset is easier for debugging
     private int score;
     private final Random gen;
 
@@ -27,15 +26,9 @@ public class G2048 {
         this.side = side;
         this.winScore = winScore;
         board = new int[side][side];
-        emptyCells = new TreeSet<>(Pair.COMPARATOR);
         score = 0;
         gen = new Random();
 
-        for (int i = 0; i < side; i++) {
-            for (int j = 0; j < side; j++) {
-                if (board[i][j] == 0) emptyCells.add(new Pair<>(i, j));
-            }
-        }
         newTile();
     }
 
@@ -120,7 +113,6 @@ public class G2048 {
                         else {
                             board[row][column] *= 2;
                             board[y][x] = 0;
-                            emptyCells.add(new Pair<>(y, x));
                             if (board[row][column] > score) score = board[row][column];
                             movement.accept(new Movement(true, y, x, row, column));
                             hasChanged = true;
@@ -132,8 +124,6 @@ public class G2048 {
                     if (tile == 0 && nxtTile != 0) {
                         board[row][column] = nxtTile;
                         board[y][x] = 0;
-                        emptyCells.add(new Pair<>(y, x));
-                        emptyCells.remove(new Pair<>(row, column));
                         movement.accept(new Movement(false, y, x, row, column));
                         hasChanged = true;
                         continue outer; // redo the outer loop to check if the newly placed number can be merged
@@ -155,8 +145,15 @@ public class G2048 {
     }
 
     public boolean isLost() {
-        if (score >= winScore || !emptyCells.isEmpty())
+        if (score >= winScore)
             return false;
+
+        // the board is not full of tiles
+        for (int i = 0; i < side; i++) {
+            for (int j = 0; j < side; j++) {
+                if (board[i][j] == 0) return false;
+            }
+        }
 
         // check if one can no longer make any move in any direction
         for (int i = 0; i < side; i++) {
@@ -191,25 +188,20 @@ public class G2048 {
     }
 
     Pair<Integer> newTile() {
-        int index = gen.nextInt(emptyCells.size());
-        Iterator<Pair<Integer>> iter = emptyCells.iterator();
-        for (int i = 0; i < index; i++) {
-            iter.next();
-        }
-
-        Pair<Integer> yx = iter.next();
-        if (board[yx.k][yx.v] != 0)
-            throw new IllegalStateException(yx.k + " " + yx.v); // this should not happen
+        int x, y;
+        do {
+            x = gen.nextInt(side);
+            y = gen.nextInt(side);
+        } while (board[y][x] != 0);
 
         if (gen.nextInt(100) >= 10) {
             // generates 2 tile
-            board[yx.k][yx.v] = 2;
+            board[y][x] = 2;
         } else {
             // generates 4 tile
-            board[yx.k][yx.v] = 4;
+            board[y][x] = 4;
         }
-        emptyCells.remove(yx);
-        return yx;
+        return new Pair<>(y, x);
     }
 
     @Override
@@ -225,37 +217,12 @@ public class G2048 {
     }
 
     static class Pair<K> {
-
-        public static final Comparator<Pair<Integer>> COMPARATOR = (o1, o2) -> {
-            if (o1.k > o2.k) return 1;
-            else if (o1.k < o2.k) return -1;
-            else {
-                if (o1.v > o2.v) return 1;
-                else if (o1.v < o2.v) return -1;
-            }
-            return 0;
-        };
-
         public final K k;
         public final K v;
 
         public Pair(K k, K v) {
             this.k = k;
             this.v = v;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Pair<?> pair = (Pair<?>) o;
-            return k.equals(pair.k) &&
-                    v.equals(pair.v);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(k, v);
         }
 
         @Override
